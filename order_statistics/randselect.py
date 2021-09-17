@@ -1,87 +1,96 @@
 import random
 
 def findith(A, i, p=0, r=-1):
+    # Update default parameter r
     if r == -1:
         r = len(A)-1
     
+    # Error check
     if p > r or i < 1 or i > r-p+1:
         raise ValueError("Invalid parameters")
     
+    # Copy the list because it will be modified
     return randselect([_ for _ in A], i, p, r)
 
 def randselect(A, i, p, r):
     """
     Choose the ith smallest element of A[p..r]
     """
-    #print(f"randselect called with params p: {p}, r: {r}")
-    #print()
-
     # Base case: A has only 1 element
     if p == r and i == 1:
         return A[p]
 
     # Randomly select a pivot
     q = random.randint(p, r)
-    #q = 3
-
 
     # Partition A[p..r] so that all elements left of A[q] are <= A[q] and
     # all elements right of A[q] are > A[q]
-    k = partition(A, p, r, q)
-
     # k is equal to how many elements are to the left of A[q]
+    k = partition(A, p, r, q)
 
     if k == i: # If the ith smallest element is the pivot
         return A[p+k-1]
     else: # Continue recursion on only the side that can have the ith element
         if i < k:
-            #print(f"if i < k, call randselect(A, i, p, p+k-2) = randselect(A, {i}, {p}, {p+k-2})")
             return randselect(A, i, p, p+k-2)
         else: # i > k
-            #print(f"if i > k, call randselect(A, i-k, p+k, r) = randselect(A, {i-k}, {p+k}, {r})")
             return randselect(A, i-k, p+k, r)
-        """
-        print(f"q = {q}, k = {k}, i = {i}")
-        
-        
-        return 777
-        """
         
 
 def partition(A, p, r, q):
     """
     Partition A[p..r] so that all elements left of A[q] are <= A[q] and
     all elements right of A[q] are > A[q]
+
+    To deal with large number of duplicates, keep track of a flag that denotes whether 
+    the current value equal to the pivot will be treated as < or > the pivot.
     """
-    #print(f"partition called with params p: {p}, r: {r}, q: {q}")
-    #print()
+    eq_flag = [True] # store in a list to allow pointer-like modifications from function
+
     pivot = A[q]
     swap(A, p, q)
-    #print(A)
-    #print(pivot)
-    #print()
     i, j = p+1, r
 
+    # Without dealing with duplicates using a flag, alg runs much slower on arrays such as 
+    # [9] * 1000
+    """
     while True:
-        while A[i] <= pivot and i < j:
+        while A[i] < pivot and i < j:
             i += 1
         while pivot < A[j] and j > i:
             j -= 1
         if i == j:
             break
         swap(A, i, j)
-        #print(A)
 
     j = i if A[i] <= pivot else i-1
     swap(A, p, j)
-    #print()
-    #print()
-    #print(A)
-    #print()
-
-    #print(f"returned k = {j-p+1}")
-    #print()
     return j-p+1
+    """
+
+    while True:
+        while less(A[i], pivot, eq_flag) and i < j:
+            i += 1
+        while less(pivot, A[j], eq_flag) and j > i:
+            j -= 1
+        if i == j:
+            break
+        swap(A, i, j)
+
+    j = i if less(A[i], pivot, eq_flag) else i-1
+    swap(A, p, j)
+    return j-p+1
+
+def less(x, y, eq_flag):
+    """
+    Modified comparison function. Same as < if x and y are different.
+    If x and y are equal, x < y if eq_flag is True, x > y if eq_flag is False.
+    """
+    if x != y:
+        return x < y
+    flag = eq_flag[0]
+    eq_flag[0] = not eq_flag[0]
+    return flag
 
 def swap(A, i, j):
     """
