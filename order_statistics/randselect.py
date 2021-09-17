@@ -58,7 +58,7 @@ def partition(A, p, r, q):
     # [9] * 1000
     """
     while True:
-        while A[i] < pivot and i < j:
+        while A[i] <= pivot and i < j:
             i += 1
         while pivot < A[j] and j > i:
             j -= 1
