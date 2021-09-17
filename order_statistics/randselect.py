@@ -126,10 +126,6 @@ def algselect(A, i, p=0, r=-1):
             return algselect(A, i-k, p+k, r)
 
 def find_pivot(A, p, r):
-    #print("="*70)
-    #print(f"p: {p}, r: {r}")
-    #print("="*70)
-    #print()
     if r-p < 5:
         return A[p+2] if p-r >= 2 else A[r]
 
@@ -137,13 +133,9 @@ def find_pivot(A, p, r):
     for i in range(p, r+1):
         if (i - p) % 5 == 0:
             groups.append([])
-            #print(groups)
-        #print(f"i = {i}, r = {r}")
-        #print(groups)
         groups[(i-p)//5].append(A[i])
 
     medians = []
-    #print(medians)
     for group in groups:
         medians.append(group[2] if len(group) >= 3 else group[-1])
 
