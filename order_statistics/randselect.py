@@ -110,7 +110,7 @@ def algselect(A, i, p=0, r=-1):
 
     # Recursively find a pivot and get its index (of first occurence if there are duplicates)
     pivot = find_pivot(A, p, r)
-    q = A[p:r+1].index(pivot)
+    q = p + A[p:r+1].index(pivot)
 
     # Partition A[p..r] so that all elements left of A[q] are <= A[q] and
     # all elements right of A[q] are > A[q]
@@ -121,21 +121,32 @@ def algselect(A, i, p=0, r=-1):
         return A[p+k-1]
     else: # Continue recursion on only the side that can have the ith element
         if i < k:
-            return randselect(A, i, p, p+k-2)
+            return algselect(A, i, p, p+k-2)
         else: # i > k
-            return randselect(A, i-k, p+k, r)
+            return algselect(A, i-k, p+k, r)
 
 def find_pivot(A, p, r):
+    #print("="*70)
+    #print(f"p: {p}, r: {r}")
+    #print("="*70)
+    #print()
     if r-p < 5:
         return A[p+2] if p-r >= 2 else A[r]
+
     groups = []
-    for i in range(p, r):
+    for i in range(p, r+1):
         if (i - p) % 5 == 0:
             groups.append([])
-        groups[i//5].append(A[i])
+            #print(groups)
+        #print(f"i = {i}, r = {r}")
+        #print(groups)
+        groups[(i-p)//5].append(A[i])
+
     medians = []
+    #print(medians)
     for group in groups:
         medians.append(group[2] if len(group) >= 3 else group[-1])
+
     return find_pivot(medians, 0, len(medians)-1)
 
 def less(x, y, eq_flag):
@@ -159,17 +170,17 @@ def swap(A, i, j):
 
 
 if __name__ == "__main__":
-    """
+
     inp = input("Enter items: ")
     inp = inp.replace("[", "")
     inp = inp.replace("]", "")
     inp = inp.replace(",", "")
     A = [int(x) for x in inp.split()]
-    """
-    A = [x*3 for x in range(1,245)]
-    #i = int(input("Enter index: "))
-    #print(findith(A, i))
-    print(find_pivot(A,0,len(A)-1))
-    print(sorted(A))
 
-#[18, 53, 58, 63, 15, 80, 75, 18, 73, 83]
+    i = int(input("Enter index: "))
+    print(sorted(A))
+    print(findith_det(A, i))
+
+
+#[18, 53, 58, 63, 15, 80, 75, 18, 73, 83] 
+# 15 63 24 59 25 94 95 55 88 26 95 36 29 64 37 33 36 89 75 40
