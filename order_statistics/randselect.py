@@ -45,7 +45,7 @@ def partition(A, p, r, q):
     To deal with large number of duplicates, keep track of a flag that denotes whether 
     the current value equal to the pivot will be treated as < or > the pivot.
     """
-    eq_flag = [True] # store in a list to allow pointer-like modifications from function
+    eq_flag = [True] # Store in a list to allow pointer-like modifications from function
 
     pivot = A[q]
     swap(A, p, q)
