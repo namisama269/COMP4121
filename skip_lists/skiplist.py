@@ -10,13 +10,26 @@ import sys
 class SkipNode:
     """
     A node in the skip list. Stores a value and pointers to next nodes on all levels.
+
+    Extra: store an array of distances on each level, which is equal to how many 
+    elements between the value and its next, excluding start and including end.
+    e.g. level 1: 1---4-------10
+         level 0: 1-2-4-7-8-9-10
+    Default is 0 if cannot go further on a level. Distance on level 0 is always 1.
+    
+    SkipNode(1).next[1] = 2 (go 2, then 4)
+    SkipNode(4).next[1] = 4 (go 7,8,9,10)
+    SkipNode(10).next[1] = 0
     """
-    def __init__(self, level=0, val=None):
+
+    def __init__(self, maxLevel, level=0, val=None):
         self.val = val
-        self.next = [None] * (level+1)
+        self.nexts = [None] * (maxLevel+1)
+        self.dists = [1] * (maxLevel+1)
+        self.level = level
 
     def getTopLevel(self):
-        return len(self.next) - 1
+        return self.level
 
 class SkipList:
     """
@@ -39,7 +52,7 @@ class SkipList:
     """
 
     def __init__(self, maxLevel):
-        self.head = SkipNode(maxLevel)
+        self.head = SkipNode(maxLevel, maxLevel)
         self.len = 0
         self.top = 0
         self.maxLevel = maxLevel
@@ -61,10 +74,24 @@ class SkipList:
         # Check the lowest level since all elements are linked there
         # If the previous value's next is the required value itself, then 
         # it has been found
-        candidate = update[0].next[0] if update[0] is not None else None
+        candidate = update[0].nexts[0] if update[0] is not None else None
         if candidate is not None and candidate.val == val:
             return candidate
         return None
+
+    def findkth(self, k):  
+        """
+        Find the kth element of the list in O(log n) time using modified search
+        with distances.
+        """
+        if k not in range(1, self.len+1):
+            raise ValueError("k not in range(1, len+1)")
+        curr = self.head
+        for lvl in range(self.maxLevel, -1, -1):
+            while k >= curr.dists[lvl]:
+                k -= curr.dists[lvl]
+                curr = curr.nexts[lvl]
+        return curr.val
 
     def contains(self, val, update=None):
         """
@@ -89,14 +116,14 @@ class SkipList:
         If the value is in the list, return the nodes that would precede the value
         if it was in the list.
         """
-        update = [None] * (self.top+1)
+        update = [self.head] * (self.maxLevel+1)
         curr = self.head
         
         # Loop from top floor to bottom floor
-        for i in range(self.top, -1, -1):
+        for i in range(self.maxLevel, -1, -1):
             # Move to next value if before the end and still smaller than search value
-            while curr.next[i] is not None and curr.next[i].val < val:
-                curr = curr.next[i]
+            while curr.nexts[i] is not None and curr.nexts[i].val < val:
+                curr = curr.nexts[i]
             update[i] = curr
         return update
 
@@ -106,7 +133,7 @@ class SkipList:
         None if not.
         """
         # Create new node for the value with a random level
-        newNode = SkipNode(self.randomLevel(), val)
+        newNode = SkipNode(maxLevel, self.randomLevel(), val)
 
         # Update the list's top level if this random level is higher than any
         # existing level
@@ -119,14 +146,77 @@ class SkipList:
         if self.search(val, update) is None:
             # Link all next pointers on each level 
             for i in range(newNode.getTopLevel()+1):
+
                 # New node's nexts are the previous node's nexts, and the previous node's
                 # nexts are the new node
-                newNode.next[i] = update[i].next[i]
-                update[i].next[i] = newNode
+                if i < newNode.getTopLevel()+1:
+                    newNode.nexts[i] = update[i].nexts[i]
+                    update[i].nexts[i] = newNode
 
+            for i in range(maxLevel+1):
+                #print()
+                #print(f"on level = {i}")
+                #print()
+                ##########
+                #TODO: explanation 
+                if i == 0:
+                    newNode.dists[i] = 1
+                else:
+                    prevHead = update[i]
+                    prevDist = 0
+                    while prevHead is not None:
+                        if prevHead == update[i].nexts[i]: # IMPORTANT
+                            #print("reached insert")
+                            break
+                        #if prevHead == self.head:
+                        #    print("head")
+                        #if prevHead is not None:
+                            #print(prevHead.val)
+                        #print(f"prevdist = {prevDist}")
+                        prevDist += prevHead.dists[i-1]
+                        
+                        prevHead = prevHead.nexts[i-1]
+                    #print()
+                    #if prevHead == newNode:
+                      #  prevDist += newNode.dists[i-1]
+                    #print(f"Prevdist = {prevDist}")
+                    #print(prevHead == newNode)
+                    currDist = 0
+                    prevHead = newNode
+                    while prevHead is not None and prevHead != newNode.nexts[i]: # IMPORTANT
+                        #print(prevHead.val if prevHead != self.head else "head")
+                        #print(prevHead == newNode)
+                        #if prevHead == newNode:
+                        #    print("new node")
+                        #if prevHead == self.head:
+                        #    print("head")
+                        #if prevHead is not None:
+                        #    print(prevHead.val)
+                        #print(f"currdist = {currDist}")
+                        currDist += prevHead.dists[i-1]
+                        prevHead = prevHead.nexts[i-1]
+                    #print()
+                    #print(f"Currdist = {currDist}")
+                    
+                    #print(update)
+                    #l = []
+                    #for x in update:
+                    #    if x is None:
+                    #        l.append(None)
+                    #    elif x == self.head:
+                    #        l.append("H")
+                    #    else:
+                    #        l.append(x.val)
+                    #print(l)
+                    #print(f"i: {i}, prevdist = {prevDist}, currdist = {currDist}")
+                    update[i].dists[i] = prevDist
+                    if update[i].nexts[i] == newNode:
+                        newNode.dists[i] = currDist
+                    else:
+                        newNode.dists[i] = 0
+                    
             # Update the length of the list after a successful insertion
             self.len += 1
-
             return val
         
         return None
@@ -143,15 +233,24 @@ class SkipList:
         curr = self.search(val, update)
         if curr is not None:
             # Fix links on each level
-            for i in range(curr.getTopLevel(), -1, -1):
+            for i in range(self.maxLevel, -1, -1):
+                ##########
+                #TODO: explanation 
+
+                if i > 0:
+                    update[i].dists[i] += (curr.dists[i])-1
+
+
+
                 # The previous node's nexts are now the node to delete's nexts.
-                update[i].next[i] = curr.next[i]
+                update[i].nexts[i] = curr.nexts[i]
 
                 # If deletion forced the node with highest level to be gone, the head's
                 # next pointer at that level would no longer point to any node, so
                 # the max height is decreased
-                if self.head.next[i] is None:
+                if self.head.nexts[i] is None:
                     self.top -= 1
+
             
             # Update the length of the list after a successful deletion
             self.len -= 1
@@ -167,17 +266,17 @@ class SkipList:
         # All elements are on level 0 so use that to get all values
         outStr = "["
         i = 0
-        node = self.head.next[0]
+        node = self.head.nexts[0]
         while node is not None:
             outStr += str(node.val)
             if i != self.len - 1:
                 outStr += ", "
             i += 1
-            node = node.next[0]
+            node = node.nexts[0]
 
         return outStr + "]"
 
-    def displayList(self):
+    def displayList(self, printDists=False):
         """
         Display level structure of the skip list.
         """
@@ -185,17 +284,28 @@ class SkipList:
         head = self.head
         for lvl in range(self.top+1):
             print("Level {}: ".format(lvl), end=" ")
-            node = head.next[lvl]
+            node = head.nexts[lvl]
             while(node != None):
                 print(node.val, end=" ")
-                node = node.next[lvl]
+                node = node.nexts[lvl]
+            print("")
+        # Print distances (for debugging)
+        if not printDists:
+            return
+        print()
+        print(head.dists)
+        for lvl in range(1):
+            node = head.nexts[lvl]
+            while(node != None):
+                print(f"{node.val}: {node.dists}")
+                node = node.nexts[lvl]
             print("")
 
 
 def processCommands(sl, command, params):
     if command == "len":
         l = len(sl)
-        print(f"There " + "is" if l == 1 else "are" + f" {l} element" + "s" if l != 1 else "" + "in the list")
+        print(f"There " + ("is" if l == 1 else "are") + f" {l} element" + ("s" if l != 1 else "") + " in the list")
         print()
     elif command == "in":
         if len(params) != 1:
@@ -203,7 +313,7 @@ def processCommands(sl, command, params):
             print()
             return
         isIn = sl.contains(params[0])
-        print(f"{params[0]} is" + "" if isIn else "not" + " in the list")
+        print(f"{params[0]} is" + ("" if isIn else " not") + " in the list")
         print()
     elif command == "ins":
         if len(params) < 1:
@@ -223,7 +333,7 @@ def processCommands(sl, command, params):
             print()
             return
         for param in params:
-            dl = sl.delete(param)
+            dl = sl.remove(param)
             if dl:
                 print(f"Successfully deleted {param} from the list")
             else:
@@ -235,6 +345,21 @@ def processCommands(sl, command, params):
     elif command == "show":
         sl.displayList()
         print()
+    elif command == "q":
+        sys.exit()
+    elif command == "kth" or command == "ith":
+        if len(params) < 1:
+            print("No value entered")
+            print()
+            return
+        for param in params:
+            try:
+                kth = sl.findkth(param)
+                print(f"Element #{param} is {kth}")
+                print()
+            except ValueError:
+                print("Invalid k, enter k from 1 to list length")
+                print()
     else:
         print("Invalid command, try again")
         print()
@@ -259,3 +384,5 @@ if __name__ == "__main__":
             processCommands(sl, command, params)
         except EOFError:
             break
+
+# 3 9 17 21 25 26 27 29 34 
