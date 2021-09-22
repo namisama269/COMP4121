@@ -118,6 +118,7 @@ class SkipList(object):
 # Driver to test above code
 def main():
     lst = SkipList(3, 0.5)
+    """
     lst.insertElement(3)
     lst.insertElement(6)
     lst.insertElement(7)
@@ -128,6 +129,7 @@ def main():
     lst.insertElement(26)
     lst.insertElement(21)
     lst.insertElement(25)
+    """
     lst.displayList()
   
 main()
