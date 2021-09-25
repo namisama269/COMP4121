@@ -79,9 +79,9 @@ class SkipList:
             return candidate
         return None
 
-    def findkth(self, k):  
+    def getKth(self, k):  
         """
-        Find the kth element of the list in O(log n) time using modified search
+        Get the kth element of the list in O(log n) time using modified search
         with distances.
         """
         if k not in range(1, self.len+1):
@@ -127,18 +127,6 @@ class SkipList:
             update[i] = curr
         return update
 
-    def getUpdateList_(self, val):
-        update = [None] * (self.top+1)
-        curr = self.head
-
-        # Loop from top floor to bottom floor
-        for i in range(self.top, -1, -1):
-            # Move to next value if before the end and still smaller than search value
-            while curr.nexts[i] is not None and curr.nexts[i].val < val:
-                curr = curr.nexts[i]
-            update[i] = curr
-        return update
-
     def insert(self, val):
         """
         Insert a value into the skip list. Return the value if successfully inserted,
@@ -166,10 +154,6 @@ class SkipList:
                     update[i].nexts[i] = newNode
 
             for i in range(maxLevel+1):
-                #print()
-                #print(f"on level = {i}")
-                #print()
-                ##########
                 #TODO: explanation 
                 if i == 0:
                     newNode.dists[i] = 1
@@ -177,50 +161,18 @@ class SkipList:
                     prevHead = update[i]
                     prevDist = 0
                     while prevHead is not None:
-                        if prevHead == update[i].nexts[i]: # IMPORTANT
-                            #print("reached insert")
+                        if prevHead == update[i].nexts[i]: # IMPORTANT TODO
                             break
-                        #if prevHead == self.head:
-                        #    print("head")
-                        #if prevHead is not None:
-                            #print(prevHead.val)
-                        #print(f"prevdist = {prevDist}")
                         prevDist += prevHead.dists[i-1]
                         
                         prevHead = prevHead.nexts[i-1]
-                    #print()
-                    #if prevHead == newNode:
-                      #  prevDist += newNode.dists[i-1]
-                    #print(f"Prevdist = {prevDist}")
-                    #print(prevHead == newNode)
+
                     currDist = 0
                     prevHead = newNode
-                    while prevHead is not None and prevHead != newNode.nexts[i]: # IMPORTANT
-                        #print(prevHead.val if prevHead != self.head else "head")
-                        #print(prevHead == newNode)
-                        #if prevHead == newNode:
-                        #    print("new node")
-                        #if prevHead == self.head:
-                        #    print("head")
-                        #if prevHead is not None:
-                        #    print(prevHead.val)
-                        #print(f"currdist = {currDist}")
+                    while prevHead is not None and prevHead != newNode.nexts[i]: # IMPORTANT TODO
                         currDist += prevHead.dists[i-1]
                         prevHead = prevHead.nexts[i-1]
-                    #print()
-                    #print(f"Currdist = {currDist}")
-                    
-                    #print(update)
-                    #l = []
-                    #for x in update:
-                    #    if x is None:
-                    #        l.append(None)
-                    #    elif x == self.head:
-                    #        l.append("H")
-                    #    else:
-                    #        l.append(x.val)
-                    #print(l)
-                    #print(f"i: {i}, prevdist = {prevDist}, currdist = {currDist}")
+
                     update[i].dists[i] = prevDist
                     if update[i].nexts[i] == newNode:
                         newNode.dists[i] = currDist
@@ -240,8 +192,6 @@ class SkipList:
         """
         # Get the update list for the value to be inserted
         update = self.getUpdateList(val)
-        for prevHead in update:
-            print(prevHead.val if prevHead != self.head else "head")
 
         # Remove the value if it is found in the list
         curr = self.search(val, update)
@@ -254,20 +204,15 @@ class SkipList:
                 if i > 0:
                     update[i].dists[i] += (curr.dists[i]-1)
 
-
             # The previous node's nexts are now the node to delete's nexts.
             for i in range(curr.level, -1, -1):
                 update[i].nexts[i] = curr.nexts[i]
-            
 
             # If deletion forced the node with highest level to be gone, the head's
             # next pointer at that level would no longer point to any node, so
             # the max height is decreased
             while self.top >= 0 and self.head.nexts[self.top] is None:
-                self.top -= 1
-                
-                    
-
+                self.top -= 1  
             
             # Update the length of the list after a successful deletion
             self.len -= 1
@@ -310,6 +255,7 @@ class SkipList:
         if not printDists:
             return
         print()
+        print("H: ", end='')
         print(head.dists)
         for lvl in range(1):
             node = head.nexts[lvl]
@@ -370,7 +316,7 @@ def processCommands(sl, command, params):
             return
         for param in params:
             try:
-                kth = sl.findkth(param)
+                kth = sl.getKth(param)
                 print(f"Element #{param} is {kth}")
                 print()
             except ValueError:

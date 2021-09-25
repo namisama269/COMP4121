@@ -1,7 +1,8 @@
 from utils import *
+#numCalls = 0
 
-def quicksort(A, lo=0, hi=-1):
-    if hi == -1:
+def quicksort(A, lo=0, hi=-10):
+    if hi == -10:
         hi = len(A)-1
 
     # base case
@@ -25,17 +26,22 @@ def partition(A, lo, hi):
             break
         A[i], A[j] = A[j], A[i]
     
+
     j = i if A[i] <= pivot else i-1
     A[lo], A[j] = A[j], A[lo]
-
     return j
 
 
-def quicksort_show(A, lo = 0, hi = -1, track_sorted=[]):
+def quicksort_show(A, lo = 0, hi = -10, track_sorted=[]):
+    #global numCalls
+    #numCalls += 1
+    #if numCalls > 10:
+    #    return
+
     if len(track_sorted) == 0:
         track_sorted = ['_' for _ in A]
 
-    if hi == -1:
+    if hi == -10:
         hi = len(A)-1
 
     if lo == 0 and hi == len(A)-1:
@@ -68,6 +74,11 @@ def quicksort_show(A, lo = 0, hi = -1, track_sorted=[]):
     quicksort_show(A, i+1, hi, track_sorted)
 
 def partition_show(A, lo, hi, track_sorted=[]):
+    #global numCalls
+    #numCalls += 1
+    #if numCalls > 10:
+    #    return
+
     pivot = A[lo]
     i, j = lo+1, hi
 
@@ -100,11 +111,14 @@ def partition_show(A, lo, hi, track_sorted=[]):
         print(TAB*2 + f"A[{lo}..{hi}] = {A[lo:hi+1]}")
         print()
     
+    
     j = i if A[i] <= pivot else i-1
     if A[i] <= pivot:
         print(TAB*0 + f"A[i] = {A[i]} <= pivot, so swap pivot with intersection index {i} to get all elements left of pivot <= pivot")
     else:
         print(TAB*0 + f"A[i] = {A[i]} > pivot, so swap pivot with index {i-1} before intersection index {i} to get all elements left of pivot <= pivot")
+    
+    
     print()
     A[lo], A[j] = A[j], A[lo]
 
@@ -122,8 +136,10 @@ if __name__ == "__main__":
     #7 8 4 1 9 3 2 6 5
     #93 42 86 49 85 37 24 53 16 77
     #4 4 4 4 4 4 4 4 4 4
-    A = [int(x) for x in input("Enter items: ").split()]
-    quicksort_show(A)
+    #A = [int(x) for x in input("Enter items: ").split()]
+    A = [x for x in range(500,0,-1)]
+    revlist = [1,2,3,4,5]#[x for x in range(5,0,-1)]
+    quicksort(A)
     print("="*70)
     print("Sorted: ")
     print("="*70)

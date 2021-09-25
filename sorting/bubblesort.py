@@ -23,6 +23,7 @@ def bubblesort_show(A, lo = 0, hi = -1):
     print(f"lo = {lo}, hi = {hi}")
     print()
 
+    total_swaps = 0
     for i in range(lo, hi):
         print(f"i = {i}")
         print()
@@ -36,15 +37,19 @@ def bubblesort_show(A, lo = 0, hi = -1):
                 print(A)
                 print()
                 A[j], A[j-1] = A[j-1], A[j]
+                total_swaps += 1
                 nswaps += 1
         # stop early if no more swaps needed
         if nswaps == 0:
             print(TAB*1 + "Array is already sorted, no more swaps")
             print()
             break
+    return total_swaps
 
 if __name__ == "__main__":
     A = [int(x) for x in input("Enter items: ").split()]
-    bubblesort_show(A, show_exec=True)
+    total_swaps = bubblesort_show(A)
     print("Sorted: ")
     print(A)
+    print(f"{total_swaps} swaps used")
+    print()
