@@ -63,18 +63,18 @@ class SkipList:
         """
         return self.len
 
-    def search(self, val, update=None):
+    def search(self, val, prevs=None):
         """
         Search for given value, return pointer to its node if found, None if not found.
         """
-        # Get the update list if not passed in (from other uses)
-        if update is None:
-            update = self.getUpdateList(val)
+        # Get the prevs list if not passed in (from other uses)
+        if prevs is None:
+            prevs = self.getPrevsList(val)
 
         # Check the lowest level since all elements are linked there
         # If the previous value's next is the required value itself, then 
         # it has been found
-        candidate = update[0].nexts[0] if update[0] is not None else None
+        candidate = prevs[0].nexts[0] if prevs[0] is not None else None
         if candidate is not None and candidate.val == val:
             return candidate
         return None
@@ -93,11 +93,11 @@ class SkipList:
                 curr = curr.nexts[lvl]
         return curr.val
 
-    def contains(self, val, update=None):
+    def contains(self, val, prevs=None):
         """
         Check if the list contains a certain value.
         """
-        return self.search(val, update) is not None
+        return self.search(val, prevs) is not None
 
     def randomLevel(self):
         """
@@ -110,13 +110,13 @@ class SkipList:
             level += 1
         return level
 
-    def getUpdateList(self, val):
+    def getPrevsList(self, val):
         """
         Get the list of nodes preceding the node with given value at every level.
         If the value is in the list, return the nodes that would precede the value
         if it was in the list.
         """
-        update = [None]* (self.maxLevel+1)#[self.head] * (self.maxLevel+1)
+        prevs = [None]* (self.maxLevel+1)#[self.head] * (self.maxLevel+1)
         curr = self.head
         
         # Loop from top floor to bottom floor
@@ -124,8 +124,8 @@ class SkipList:
             # Move to next value if before the end and still smaller than search value
             while curr.nexts[i] is not None and curr.nexts[i].val < val:
                 curr = curr.nexts[i]
-            update[i] = curr
-        return update
+            prevs[i] = curr
+        return prevs
 
     def insert(self, val):
         """
@@ -135,33 +135,33 @@ class SkipList:
         # Create new node for the value with a random level
         newNode = SkipNode(maxLevel, self.randomLevel(), val)
 
-        # Update the list's top level if this random level is higher than any
+        # prevs the list's top level if this random level is higher than any
         # existing level
         self.top = max(self.top, newNode.getTopLevel())
 
-        # Get the update list for the value to be inserted
-        update = self.getUpdateList(val)
+        # Get the prevs list for the value to be inserted
+        prevs = self.getPrevsList(val)
         
         # Insert the value if it is not already in the list
-        if self.search(val, update) is None:
+        if self.search(val, prevs) is None:
             # Link all next pointers on each level 
             for i in range(newNode.getTopLevel()+1):
 
                 # New node's nexts are the previous node's nexts, and the previous node's
                 # nexts are the new node
                 if i < newNode.getTopLevel()+1:
-                    newNode.nexts[i] = update[i].nexts[i]
-                    update[i].nexts[i] = newNode
+                    newNode.nexts[i] = prevs[i].nexts[i]
+                    prevs[i].nexts[i] = newNode
 
             for i in range(maxLevel+1):
                 #TODO: explanation 
                 if i == 0:
                     newNode.dists[i] = 1
                 else:
-                    prevHead = update[i]
+                    prevHead = prevs[i]
                     prevDist = 0
                     while prevHead is not None:
-                        if prevHead == update[i].nexts[i]: # IMPORTANT TODO
+                        if prevHead == prevs[i].nexts[i]: # IMPORTANT TODO
                             break
                         prevDist += prevHead.dists[i-1]
                         
@@ -173,13 +173,13 @@ class SkipList:
                         currDist += prevHead.dists[i-1]
                         prevHead = prevHead.nexts[i-1]
 
-                    update[i].dists[i] = prevDist
-                    if update[i].nexts[i] == newNode:
+                    prevs[i].dists[i] = prevDist
+                    if prevs[i].nexts[i] == newNode:
                         newNode.dists[i] = currDist
                     else:
                         newNode.dists[i] = 0
                     
-            # Update the length of the list after a successful insertion
+            # prevs the length of the list after a successful insertion
             self.len += 1
             return val
         
@@ -190,11 +190,11 @@ class SkipList:
         Remove a value from the skip list. Return the value if successfully removed,
         None if not.
         """
-        # Get the update list for the value to be inserted
-        update = self.getUpdateList(val)
+        # Get the prevs list for the value to be inserted
+        prevs = self.getPrevsList(val)
 
         # Remove the value if it is found in the list
-        curr = self.search(val, update)
+        curr = self.search(val, prevs)
         if curr is not None:
             # Fix links on each level
             for i in range(self.maxLevel, -1, -1):
@@ -202,11 +202,11 @@ class SkipList:
                 #TODO: explanation 
 
                 if i > 0:
-                    update[i].dists[i] += (curr.dists[i]-1)
+                    prevs[i].dists[i] += (curr.dists[i]-1)
 
             # The previous node's nexts are now the node to delete's nexts.
             for i in range(curr.level, -1, -1):
-                update[i].nexts[i] = curr.nexts[i]
+                prevs[i].nexts[i] = curr.nexts[i]
 
             # If deletion forced the node with highest level to be gone, the head's
             # next pointer at that level would no longer point to any node, so
@@ -214,7 +214,7 @@ class SkipList:
             while self.top >= 0 and self.head.nexts[self.top] is None:
                 self.top -= 1  
             
-            # Update the length of the list after a successful deletion
+            # prevs the length of the list after a successful deletion
             self.len -= 1
             return val
 
