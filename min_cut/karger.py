@@ -114,4 +114,4 @@ if __name__ == "__main__":
     G.insertEdge(0,2,20)
     G.insertEdge(1,2,30)
     for i in range(50):
-        print(_4contract(G))
+        print(karger(G))
