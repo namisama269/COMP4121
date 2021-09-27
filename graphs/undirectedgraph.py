@@ -48,6 +48,13 @@ class UndirectedGraph:
         self.edges[v2][v1] = None
         self.nE -= 1
 
+    def getEdges(self):
+        edges = []
+        for i in range(self.nV):
+            for j in range(i+1, self.nV):
+                edges.append((i, j, self.edges[i][j]))
+        return edges
+
     def printGraph(self):
         print(f"Graph has {self.nV} vertices and {self.nE} edges")
         print()
