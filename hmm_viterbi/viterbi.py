@@ -60,7 +60,7 @@ def viterbi(O, S, P, y, Tm, Em):
     K, T = len(S), len(y)
     check_input(O, S, P, y, Tm, Em)
 
-    # Construct the 2 dp tables with dimensions k*t
+    # Construct the 2 dp tables with dimensions K x T
     dp1 = np.zeros((K, T))
     dp2 = np.zeros((K, T))
 
@@ -96,14 +96,14 @@ def check_input(O, S, P, y, Tm, Em):
     N, K, T = len(O), len(S), len(y)
 
     if len(P) != K:
-        raise ValueError("k probabilites must be provided")
+        raise ValueError("K probabilites must be provided")
     if len(y) != T:
-        raise ValueError("t observations must be provided")
+        raise ValueError("T observations must be provided")
     if np.shape(Tm) != (K, K):
-        raise ValueError("Transmission matrix must have dimensions k*k")
+        raise ValueError("Transmission matrix must have dimensions K x K")
     if np.shape(Em) != (K, N):
         print(np.shape(Tm))
-        raise ValueError("Emission matrix must have dimensions k*n")
+        raise ValueError("Emission matrix must have dimensions K x N")
     for prob in P:
         if prob < 0 or prob > 1:
             raise ValueError("Initial probabilities must be between 0 and 1")
