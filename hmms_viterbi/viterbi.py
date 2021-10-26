@@ -31,6 +31,7 @@ def viterbi(O, S, P, y, Tm, Em):
         Em: emission matrix of size K x N such that Em[i][k] stores the 
             probability that if the chain is at state s_i, the observable
             outcome will be o_k.
+            NOTE: first index = state, second index = emission
 
     Output:
         x: list of T indices [x_0,x_1,...x_T-1] of most likely states that
@@ -65,13 +66,13 @@ def viterbi(O, S, P, y, Tm, Em):
 
     # Base case: on first observation (j = 0)
     for i in range(K):
-        dp1[i][0] = P[i] * Em[y[0]][i]
+        dp1[i][0] = P[i] * Em[i][y[0]]
         dp2[i][0] = 0
 
     # Recurrence case
     for j in range(1, T):
         for i in range(K):
-            candidates = np.array([dp1[k][j-1] * Tm[k][i] * Em[y[j]][i] for k in range(K)])
+            candidates = np.array([dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] for k in range(K)])
             dp1[i][j] = np.max(candidates)
             dp2[i][j] = np.argmax(candidates) 
     
@@ -156,17 +157,17 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
     print(f"Base case: j = 0")
     print()
     for i in range(K):
-        dp1[i][0] = P[i] * Em[y[0]][i]
+        dp1[i][0] = P[i] * Em[i][y[0]]
         dp2[i][0] = 0
-        print(f"    dp1[{i}][0] = P[{i}] * Em[y[0]][{i}] = ",end="")
+        print(f"    dp1[{i}][0] = P[{i}] * Em[{i}][y[0]] = ",end="")
         if use_frac:
             print(f"{Fraction(P[i]).limit_denominator()} * ", end="")
-            print(f"{Fraction(Em[y[0]][i]).limit_denominator()} = ", end="")
-            print(f"{Fraction(P[i] * Em[y[0]][i]).limit_denominator()}")
+            print(f"{Fraction(Em[i][y[0]]).limit_denominator()} = ", end="")
+            print(f"{Fraction(P[i] * Em[i][y[0]]).limit_denominator()}")
         else:
             print(f"{P[i]:.{PRECISION}f} * ", end="")
-            print(f"{Em[y[0]][i]:.{PRECISION}f} = ", end="")
-            print(f"{P[i] * Em[y[0]][i]:.{PRECISION}f}")
+            print(f"{Em[i][y[0]]:.{PRECISION}f} = ", end="")
+            print(f"{P[i] * Em[i][y[0]]:.{PRECISION}f}")
         print("    dp2[i][0] = 0")
     print()
 
@@ -175,22 +176,22 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
         print(f"Current iteration: j = {j}")
         print()
         for i in range(K):
-            candidates = np.array([dp1[k][j-1] * Tm[k][i] * Em[y[j]][i] for k in range(K)])
+            candidates = np.array([dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] for k in range(K)])
             print(f"    Candidates when i = {i}:")
             for k in range(K):
                 if use_frac:
                     print(f"    {Fraction(candidates[k]).limit_denominator()}", end="")
                 else:
                     print(f"    {candidates[k]:.{PRECISION}f}", end="")
-                print(f" = dp1[{k}][{j-1}] * Tm[{k}][{i}] * Em[y[{j}]][{i}] = ", end="")
+                print(f" = dp1[{k}][{j-1}] * Tm[{k}][{i}] * Em[{i}][y[{j}]] = ", end="")
                 if use_frac:
                     print(f"{Fraction(dp1[k][j-1]).limit_denominator()} * ", end="")
                     print(f"{Fraction(Tm[k][i]).limit_denominator()} * ",end="")
-                    print(f"{Fraction(Em[y[j]][i]).limit_denominator()}")
+                    print(f"{Fraction(Em[i][y[j]]).limit_denominator()}")
                 else:
                     print(f"{dp1[k][j-1]:.{PRECISION}f} * ", end="")
-                    print(f"{Tm[k][i]:.{PRECISION}f} = ", end="")
-                    print(f"{Em[y[j]][i]:.{PRECISION}f}")
+                    print(f"{Tm[k][i]:.{PRECISION}f} * ", end="")
+                    print(f"{Em[i][y[j]]:.{PRECISION}f}")
 
             print()
             if use_frac:
@@ -218,7 +219,7 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
     print(f"The highest probability state has probability {fprob} and ends on state {int(opt)}")
     print()
     for j in range(T-1, 0, -1):
-        z = int(dp2[opt][j])
+        opt = int(dp2[opt][j])
         x[j-1] = opt
     
     print(f"Backtracking from row {int(opt)} from the right,")
@@ -232,16 +233,6 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
 ###################################################################################################
 
 if __name__ == "__main__":
-    """
-    O = ["normal", "cold", "dizzy"]
-    S = ["Healthy", "Fever"]
-    P = np.array([0.6, 0.4])
-    y = np.array([0, 1, 2])
-    Tm = np.array([[0.7, 0.3], [0.4, 0.6]])
-    Em = np.array([[0.5, 0.4, 0.1], [0.1, 0.3, 0.6]])
-    x = viterbi(O, S, P, y, Tm, Em)
-    print(x) 
-    """
     pass
 
 

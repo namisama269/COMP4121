@@ -48,11 +48,14 @@ P(P->P) = Tm[1][1] = π(P) = 1/3, P(P->R) = Tm[1][0] = π(R) = 2/3.
 
 For the emission probabilities, given that you are actually looking at a possum,
 the probability that you think you saw a raccoon is 1/3. 
-So P(r|P) = Em[0][1] = 1/3, and by total probability, if you did not think
+So P(r|P) = Em[1][0] = 1/3, and by total probability, if you did not think
 you saw a raccoon, then you must have thought you saw a possum, so 
 P(p|P) = Em[1][1] = 2/3.
 
-Similarly, P(p|R) = Em[1][0] = 1/4 and P(r|R) = Em[0][0] = 3/4.
+Similarly, P(p|R) = Em[0][1] = 1/4 and P(r|R) = Em[0][0] = 3/4.
+
+NOTE: make sure the emissions index the state (R or P) first, then the 
+observations (r or p).
 """
 
 O =  ["r", "p"]
@@ -60,7 +63,7 @@ S = ["R", "P"]
 P = np.array([2/3, 1/3])
 y = np.array([0, 1, 1, 0])
 Tm = np.array([[4/5, 1/5], [2/3, 1/3]])
-Em = np.array([[3/4, 1/3], [1/4, 2/3]])
+Em = np.array([[3/4, 1/4], [1/3, 2/3]])
 
 x, prob = viterbi_print_exec(O, S, P, y, Tm, Em, use_frac=True)
 print_result(O, S, x, y, prob, use_frac=True)
