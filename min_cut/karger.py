@@ -9,7 +9,7 @@ import math
 
 from graphs.undirectedgraph import UndirectedGraph   
 
-INT_MAX = 1e9
+INT_MAX = 2147483647
 
 def contract(G, u, v):
     """

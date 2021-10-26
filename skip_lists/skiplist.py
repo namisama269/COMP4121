@@ -1,9 +1,3 @@
-"""
-Based on:
-https://github.com/kunigami/blog-examples/blob/master/skip-list/skipList.py
-https://www.geeksforgeeks.org/skip-list-set-2-insertion/
-"""
-
 import random
 import sys
 
@@ -263,6 +257,15 @@ class SkipList:
                 print(f"{node.val}: {node.dists}")
                 node = node.nexts[lvl]
 
+
+
+
+
+
+
+"""
+Driver code to test implementation
+"""
 
 def processCommands(sl, command, params):
     if command == "len":
