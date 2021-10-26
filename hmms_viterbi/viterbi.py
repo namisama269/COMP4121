@@ -28,7 +28,7 @@ def viterbi(O, S, P, y, Tm, Em):
             probability that if at an instant t, the chain is at state s_i, 
             then at instant t+1, the chain is at state s_j.
 
-        Em: emmision matrix of size K x N such that Em[i][k] stores the 
+        Em: emission matrix of size K x N such that Em[i][k] stores the 
             probability that if the chain is at state s_i, the observable
             outcome will be o_k.
 
@@ -57,7 +57,6 @@ def viterbi(O, S, P, y, Tm, Em):
            compute x
     """
     K, T = len(S), len(y)
-
     check_input(O, S, P, y, Tm, Em)
 
     # Construct the 2 dp tables with dimensions k*t
@@ -69,14 +68,14 @@ def viterbi(O, S, P, y, Tm, Em):
         dp1[i][0] = P[i] * Em[y[0]][i]
         dp2[i][0] = 0
 
-    # DP
+    # Recurrence case
     for j in range(1, T):
         for i in range(K):
             candidates = np.array([dp1[k][j-1] * Tm[k][i] * Em[y[j]][i] for k in range(K)])
             dp1[i][j] = np.max(candidates)
             dp2[i][j] = np.argmax(candidates) 
     
-    # Get the path
+    # Backtrack along dp2 to get the path
     prob = np.max([dp1[k][T-1] for k in range(K)])
     opt = np.argmax([dp1[k][T-1] for k in range(K)])
     x = [None for _ in range(T)]
