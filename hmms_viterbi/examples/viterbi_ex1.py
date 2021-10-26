@@ -37,7 +37,7 @@ The transition probabilities are independent of any observations, so the
 information to get it does not have anything to do with "what you saw" or 
 "what you think you saw". 
 
-It is given that  if a raccoon comes to your back yard the probability that 
+It is given that if a raccoon comes to your back yard the probability that 
 the next animal to follow will also be a raccoon is 4/5, so P(R->R) = 
 Tm[0][0] = 4/5, and by total probability, if it's not a raccoon then it has
 to be a possum, so P(R->P) = Tm[0][1] = 1/5.
