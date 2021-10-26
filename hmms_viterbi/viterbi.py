@@ -83,7 +83,7 @@ def viterbi(O, S, P, y, Tm, Em):
     x[T-1] = opt
 
     for j in range(T-1, 0, -1):
-        z = int(dp2[opt][j])
+        opt = int(dp2[opt][j])
         x[j-1] = opt
 
     return x, prob
@@ -211,6 +211,7 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
     print()
 
     opt = np.argmax([dp1[k][T-1] for k in range(K)])
+    row = opt
     x = [None for _ in range(T)]
     x[T-1] = opt
     prob = np.max([dp1[k][T-1] for k in range(K)])
@@ -222,7 +223,7 @@ def viterbi_print_exec(O, S, P, y, Tm, Em, use_frac = True):
         opt = int(dp2[opt][j])
         x[j-1] = opt
     
-    print(f"Backtracking from row {int(opt)} from the right,")
+    print(f"Backtracking from row {int(row)} from the right,")
     print(f"x = ", end="")
     print(x)
     print()
