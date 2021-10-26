@@ -1,7 +1,7 @@
 import sys
 sys.path.append('.')
 import numpy as np
-from hmms_viterbi.viterbi import viterbi_print_exec, print_result
+from hmm_viterbi.viterbi import viterbi_print_exec, print_result
 
 """
 Raccoons and possums problem from the lecture slides.
