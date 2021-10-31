@@ -56,6 +56,30 @@ def viterbi(O, S, P, y, Tm, Em):
 
         opt: keeps track of index of the optimal path when backtracking to
            compute x
+
+    Recurrence relation:
+
+        Base case (dp1[i][0], j = 0): 
+        = largest possible prob that there exists a sequence [s_i] that generates 
+          the observations [y_0]
+        = initial probability that the chain starts in s_i AND the outcome y_0
+          is observed from s_i
+        = P[i] * Em[i][y[0]]
+
+        Recurrence case (dp1[i][j]):
+        = largest possible prob that there exists a sequence of length j ending in s_i 
+          that generates the first j observations
+        A sequence of length j ending in s_i can be formed by taking ANY sequence of 
+        length j-1 and adding s_i to it, given that previous sequence caused the 
+        observations equal to first j-1 observations in y.
+        This chain of length j-1 can end in any one of the K states.
+        To get the best probability, would have to choose from the best probability 
+        for the first j-1 states first, so the candidates for dp1[i][j] are:
+            best probability for sequence of length j-1 ending in state s_k AND
+            the sequence transitions to state s_i at the jth state AND
+            the observation y_j-1 is observed (emitted) from state s_i
+            = [dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] for k in range(K)]
+        choose the best one.
     """
     K, T = len(S), len(y)
     check_input(O, S, P, y, Tm, Em)
