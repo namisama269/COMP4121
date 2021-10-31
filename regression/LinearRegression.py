@@ -28,7 +28,7 @@ class MyLinearRegression:
             residuals = prev_y - y
             gradient = np.dot(x.T, residuals)
             self.model_params -= 1/m * self.learning_rate * gradient
-            cost = 1/(2*m) * np.sum(residuals ** 2)
+            cost = 1/(2*m) * np.sum((residuals ** 2))
             self.costs.append(cost)
 
         return self
