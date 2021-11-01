@@ -1,9 +1,6 @@
 # Implementation of the Viterbi algorithm
 # Examples are provided in examples folder, e.g. how to derive 
 # transmission/emission matrix values
-import sys
-sys.path.append('.')
-
 import numpy as np
 from fractions import Fraction
 PRECISION = 5
