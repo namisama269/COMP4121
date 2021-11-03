@@ -1,10 +1,8 @@
 """
-Implementation of K-Means clustering algorithm
+Implementation of K-Median clustering algorithm
 """
 import numpy as np
 import pandas as pd
-from utils import euclidean_dist, wcss
-
 
 class MyKMedian:
     def __init__(self, max_iter = 300):

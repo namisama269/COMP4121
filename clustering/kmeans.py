@@ -4,8 +4,6 @@ https://medium.com/nerd-for-tech/k-means-python-implementation-from-scratch-8400
 """
 import numpy as np
 import pandas as pd
-from utils import euclidean_dist, wcss
-
 
 class MyKMeans:
     def __init__(self, max_iter = 300):

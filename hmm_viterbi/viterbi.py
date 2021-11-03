@@ -3,7 +3,7 @@
 # transmission/emission matrix values
 import numpy as np
 from fractions import Fraction
-PRECISION = 5
+PRECISION = 5 # how many decimal points to print
 
 def viterbi(O, S, P, y, Tm, Em):
     """
