@@ -1,5 +1,7 @@
+"""
+
+"""
 import random
-import sys
 
 class SkipNode:
     """
@@ -7,13 +9,7 @@ class SkipNode:
 
     Extra: store an array of distances on each level, which is equal to how many 
     elements between the value and its next, excluding start and including end.
-    e.g. level 1: 1---4-------10
-         level 0: 1-2-4-7-8-9-10
-    Default is 0 if cannot go further on a level. Distance on level 0 is always 1.
-    
-    SkipNode(1).next[1] = 2 (go 2, then 4)
-    SkipNode(4).next[1] = 4 (go 7,8,9,10)
-    SkipNode(10).next[1] = 0
+    Distance on level 0 is always 1.
     """
 
     def __init__(self, maxLevel, level=0, val=None):
@@ -38,11 +34,11 @@ class SkipList:
     Public methods: 
     - __len__: get the number of elements in the skip list
     - contains: check if the list contains a certain value
-    - isEmpty: check if the list is empty
+    - empty: check if the list is empty
     - insert: insert a value into the skip list
     - remove: remove a value from the skip list
     - __str__: display elements of the skip list in list form
-    - displayList: display level structure of the skip list
+    - display: display level structure of the skip list
     """
 
     def __init__(self, maxLevel):
@@ -56,6 +52,9 @@ class SkipList:
         Get the number of elements in the skip list.
         """
         return self.len
+
+    def empty(self):
+        return self.len == 0
 
     def search(self, val, prevs=None):
         """
@@ -73,13 +72,17 @@ class SkipList:
             return candidate
         return None
 
-    def getKth(self, k):  
+    def __getitem__(self, k):  
         """
         Get the kth element of the list in O(log n) time using modified search
         with distances.
         """
-        if k not in range(1, self.len+1):
-            raise ValueError("k not in range(1, len+1)")
+        if k not in range(0, self.len):
+            raise ValueError("k not in range(0, len)")
+
+        # Start index from 0 to be consistent with array indexing
+        k += 1
+
         curr = self.head
         for lvl in range(self.maxLevel, -1, -1):
             while k >= curr.dists[lvl]:
@@ -87,7 +90,7 @@ class SkipList:
                 curr = curr.nexts[lvl]
         return curr.val
 
-    def contains(self, val, prevs=None):
+    def __contains__(self, val, prevs=None):
         """
         Check if the list contains a certain value.
         """
@@ -127,9 +130,9 @@ class SkipList:
         None if not.
         """
         # Create new node for the value with a random level
-        newNode = SkipNode(maxLevel, self.randomLevel(), val)
+        newNode = SkipNode(self.maxLevel, self.randomLevel(), val)
 
-        # prevs the list's top level if this random level is higher than any
+        # Update the list's top level if this random level is higher than any
         # existing level
         self.top = max(self.top, newNode.getTopLevel())
 
@@ -147,20 +150,28 @@ class SkipList:
                     newNode.nexts[i] = prevs[i].nexts[i]
                     prevs[i].nexts[i] = newNode
 
-            for i in range(maxLevel+1):
-                #TODO: explanation 
+            # Update the distances to the next node on each level
+            for i in range(self.maxLevel+1):
+                # Since all nodes are connected on the bottom level, the distance to
+                # the next node is always 1
                 if i == 0:
                     newNode.dists[i] = 1
                 else:
+                    # Find the new node's previous pointer
                     prevHead = prevs[i]
+                    # Search on the level below for the distance between the prev 
+                    # and new node, since it is the highest level that both nodes are 
+                    # guaranteed to have links on
                     prevDist = 0
+                    # Add the distances from all nodes in between on the level below
                     while prevHead is not None:
-                        if prevHead == prevs[i].nexts[i]: # IMPORTANT TODO
+                        if prevHead == prevs[i].nexts[i]: 
                             break
                         prevDist += prevHead.dists[i-1]
-                        
                         prevHead = prevHead.nexts[i-1]
 
+                    # Now do the same from the new node to its next, iterating on
+                    # the level below to get its distance
                     currDist = 0
                     prevHead = newNode
                     while prevHead is not None and prevHead != newNode.nexts[i]: # IMPORTANT TODO
@@ -173,7 +184,7 @@ class SkipList:
                     else:
                         newNode.dists[i] = 0
                     
-            # prevs the length of the list after a successful insertion
+            # Update the length of the list after a successful insertion
             self.len += 1
             return val
         
@@ -192,8 +203,8 @@ class SkipList:
         if curr is not None:
             # Fix links on each level
             for i in range(self.maxLevel, -1, -1):
-                ##########
-                #TODO: explanation 
+                # Update the previous nodes distance by adding on the current
+                # node's distance
 
                 if i > 0:
                     prevs[i].dists[i] += (curr.dists[i]-1)
@@ -208,7 +219,7 @@ class SkipList:
             while self.top >= 0 and self.head.nexts[self.top] is None:
                 self.top -= 1  
             
-            # prevs the length of the list after a successful deletion
+            # Update the length of the list after a successful deletion
             self.len -= 1
             return val
 
@@ -218,7 +229,6 @@ class SkipList:
         """
         Display elements of the skip list in list form.
         """
-        
         # All elements are on level 0 so use that to get all values
         outStr = "["
         i = 0
@@ -232,11 +242,11 @@ class SkipList:
 
         return outStr + "]"
 
-    def displayList(self, printDists=True):
+    def display(self, printDists=True):
         """
         Display level structure of the skip list.
         """
-        print("\n*****Skip List******")
+        print("\n******Skip List******")
         head = self.head
         for lvl in range(self.top+1):
             print("Level {}: ".format(lvl), end=" ")
@@ -263,91 +273,3 @@ class SkipList:
 
 
 
-"""
-Driver code to test implementation
-"""
-
-def processCommands(sl, command, params):
-    if command == "len":
-        l = len(sl)
-        print(f"There " + ("is" if l == 1 else "are") + f" {l} element" + ("s" if l != 1 else "") + " in the list")
-        print()
-    elif command == "in":
-        if len(params) != 1:
-            print("No value entered")
-            print()
-            return
-        isIn = sl.contains(params[0])
-        print(f"{params[0]} is" + ("" if isIn else " not") + " in the list")
-        print()
-    elif command == "ins":
-        if len(params) < 1:
-            print("No value entered")
-            print()
-            return
-        for param in params:
-            ins = sl.insert(param)
-            if ins:
-                print(f"Successfully inserted {param} into the list")
-            else:
-                print(f"{param} is already in the list, cannot insert")
-        print()
-    elif command == "del":
-        if len(params) < 1:
-            print("No value entered")
-            print()
-            return
-        for param in params:
-            dl = sl.remove(param)
-            if dl:
-                print(f"Successfully deleted {param} from the list")
-            else:
-                print(f"{param} is not in the list, cannot delete")
-        print()
-    elif command == "str":
-        print(str(sl))
-        print()
-    elif command == "show":
-        sl.displayList()
-        print()
-    elif command == "q":
-        sys.exit()
-    elif command == "kth" or command == "ith":
-        if len(params) < 1:
-            print("No value entered")
-            print()
-            return
-        for param in params:
-            try:
-                kth = sl.getKth(param)
-                print(f"Element #{param} is {kth}")
-                print()
-            except ValueError:
-                print("Invalid k, enter k from 1 to list length")
-                print()
-    else:
-        print("Invalid command, try again")
-        print()
-
-
-
-if __name__ == "__main__":
-    # Enter argument for max level of skip list in command line
-    maxLevel = int(sys.argv[1])
-    sl = SkipList(maxLevel)
-    print(f"Initialised skip list with maximum {maxLevel+1} levels")
-    print("Enter commands from {len, in, ins, del, str, show}")
-    print()
-
-    while True:
-        try:
-            inp = input().split()
-            if len(inp) < 1:
-                continue
-            command = inp[0]
-            params = [] if len(inp) == 1 else [int(x) for x in inp[1:]]
-            processCommands(sl, command, params)
-        except EOFError:
-            break
-
-# 3 9 17 21 25 26 27 29 34 

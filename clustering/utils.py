@@ -1,12 +1,19 @@
 import numpy as np
 
-def euclidean_dist(p1, p2):
+def sq_euclidean(p1, p2):
+    """
+    
+    """
     if len(p1) != len(p2):
         raise ValueError("Points must have equal dimension")
     squared_dist = 0
     for i in range(len(p1)):
         squared_dist += (p2[i] - p1[i])**2
-    return np.sqrt(squared_dist)
+    
+    return squared_dist
+
+def euclidean_dist(p1, p2):
+    return np.sqrt(sq_euclidean(p1, p2))
 
 def wcss(X, centroids, cluster):
     sum = 0

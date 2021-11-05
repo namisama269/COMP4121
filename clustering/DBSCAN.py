@@ -25,9 +25,9 @@ class MyDBSCAN:
         point_i.
         """
         neighbours = []
-        for i, point in enumerate(self.data):
+        for i, point in enumerate(self.X):
             # Distance metric is Euclidean distance
-            if euclidean_dist(point, self.data[point_i]) <= self.eps:
+            if euclidean_dist(point, self.X[point_i]) <= self.eps:
                 neighbours.append(i)
         return np.array(neighbours)
 
@@ -62,7 +62,7 @@ class MyDBSCAN:
         Fit the data into clusters using DBSCAN.
         """
         n_samples = X.shape[0]
-        self.data = X
+        self.X = X
         self.clusters = []
         # Keep track of which points have been visited when expanding clusters
         self.visited = [False for _ in range(n_samples)]
