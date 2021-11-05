@@ -29,7 +29,7 @@ def processCommands(sl, command, params):
             else:
                 print(f"{param} is already in the list, cannot insert")
         print()
-    elif command == "del":
+    elif command == "del" or "rem":
         if len(params) < 1:
             print("No value entered")
             print()
