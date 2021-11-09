@@ -18,9 +18,6 @@ class SkipNode:
         self.dists = [1] * (maxLevel+1)
         self.level = level
 
-    def getTopLevel(self):
-        return self.level
-
 class SkipList:
     """
     Skip list class. Levels are indexed from 0.
@@ -83,6 +80,10 @@ class SkipList:
         # Start index from 0 to be consistent with array indexing
         k += 1
 
+        # Go next on a level while subtracting the distance to next does not
+        # exceed k, if cannot go further then go down
+        # Always reaches k since at the lowest level the distance increment
+        # is always 1
         curr = self.head
         for lvl in range(self.maxLevel, -1, -1):
             while k >= curr.dists[lvl]:
@@ -134,7 +135,7 @@ class SkipList:
 
         # Update the list's top level if this random level is higher than any
         # existing level
-        self.top = max(self.top, newNode.getTopLevel())
+        self.top = max(self.top, newNode.level)
 
         # Get the prevs list for the value to be inserted
         prevs = self.getPrevsList(val)
@@ -142,11 +143,11 @@ class SkipList:
         # Insert the value if it is not already in the list
         if self.search(val, prevs) is None:
             # Link all next pointers on each level 
-            for i in range(newNode.getTopLevel()+1):
+            for i in range(newNode.level+1):
 
                 # New node's nexts are the previous node's nexts, and the previous node's
                 # nexts are the new node
-                if i < newNode.getTopLevel()+1:
+                if i < newNode.level+1:
                     newNode.nexts[i] = prevs[i].nexts[i]
                     prevs[i].nexts[i] = newNode
 
@@ -203,9 +204,8 @@ class SkipList:
         if curr is not None:
             # Fix links on each level
             for i in range(self.maxLevel, -1, -1):
-                # Update the previous nodes distance by adding on the current
+                # Update the previous node's distance by adding on the current
                 # node's distance
-
                 if i > 0:
                     prevs[i].dists[i] += (curr.dists[i]-1)
 

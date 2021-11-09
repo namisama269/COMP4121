@@ -4,9 +4,6 @@ https://towardsdatascience.com/linear-regression-using-python-b136c91bf0a2
 
 
 """
-import sys
-sys.path.append('.')
-
 import numpy as np
 
 class MyLinearRegression:
@@ -20,18 +17,18 @@ class MyLinearRegression:
 
     def fit(self, x, y):
         self.costs = []
-        self.model_params = np.zeros((x.shape[1], 1))
+        self.weights = np.zeros((x.shape[1], 1))
         m = x.shape[0]
 
         for _ in range(self.num_iters):
-            prev_y = np.dot(x, self.model_params)
+            prev_y = np.dot(x, self.weights)
             residuals = prev_y - y
             gradient = np.dot(x.T, residuals)
-            self.model_params -= 1/m * self.learning_rate * gradient
+            self.weights -= 1/m * self.learning_rate * gradient
             cost = 1/(2*m) * np.sum((residuals ** 2))
             self.costs.append(cost)
 
         return self
 
     def predict(self, x):
-        return np.dot(x, self.model_params)
+        return np.dot(x, self.weights)
