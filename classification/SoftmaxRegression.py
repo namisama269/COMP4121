@@ -8,7 +8,7 @@ https://towardsdatascience.com/multiclass-logistic-regression-from-scratch-9cc00
 import numpy as np
 
 """
-Replace softmax/onehot implementation with these for performance increase
+Replace softmax/onehot implementation with these for performance increase.
 The implemented onehot is not much slower because only called once, but
 the scipy softmax is much faster than own implementation and is very 
 noticeable because it is called once every iteration, and there are 1000 
@@ -19,7 +19,7 @@ from sklearn.preprocessing import OneHotEncoder
 onehot_encoder = OneHotEncoder(sparse=False)
 
 def softmax_row(Z):
-    return [np.exp(row)/np.sum(np.exp(row)) for row in Z]
+    return np.array([np.exp(row)/np.sum(np.exp(row)) for row in Z])
 
 def onehot(Y):
     N = Y.shape[0]
