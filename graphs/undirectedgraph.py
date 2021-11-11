@@ -86,32 +86,33 @@ class UndirectedGraph:
             for j in range(DG.nV):
                 self.edges[i][j] = DG.edges[i][j]
 
-def importUDGFromFile(self, filename):
-    """
-    Import graph from file, no error checks. Format:
+    @staticmethod
+    def importUDGFromFile(filename):
+        """
+        Import graph from file, no error checks. Format:
 
-    nV
-    v1 v2 weight
-    ...
+        nV
+        v1 v2 weight
+        ...
 
-    weight = 0 if not given
+        weight = 0 if not given
 
-    Return the graph object.
-    """
-    f = open(filename, 'r')
-    lines = f.readlines()
-    nV = int(lines[0])
-    UDG = UndirectedGraph(nV)
-    for i, line in enumerate(lines):
-        if i == 0:
-            continue
-        line = line.split()
-        v1, v2 = int(line[0]), int(line[1])
-        wt = 0 if len(line) < 3 else float(line[2])
-        UDG.insertEdge(v1, v2, wt)
-    f.close()
+        Return the graph object.
+        """
+        f = open(filename, 'r')
+        lines = f.readlines()
+        nV = int(lines[0])
+        UDG = UndirectedGraph(nV)
+        for i, line in enumerate(lines):
+            if i == 0:
+                continue
+            line = line.split()
+            v1, v2 = int(line[0]), int(line[1])
+            wt = 0 if len(line) < 3 else float(line[2])
+            UDG.insertEdge(v1, v2, wt)
+        f.close()
 
-    return UDG
+        return UDG
 
 
 if __name__ == "__main__":

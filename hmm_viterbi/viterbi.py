@@ -5,79 +5,80 @@ import numpy as np
 from fractions import Fraction
 PRECISION = 5 # how many decimal points to print
 
+"""
+Implementation of the Viterbi algorithm.
+
+Input:
+    O: observation space of N observations [o_0,o_1,...,o_N-1].
+
+    S: state space of K states [s_0,s_1,...,s_K-1].
+
+    P: initial probabilities [p_0,p_1,...,p_K-1] for each of the K states,
+        where p_i is the probability that the chain starts in state s_i.
+
+    y: list of T initial observations [y_0,y_1,...,y_T-1], each entry
+        is the index of the observation in O, e.g. y_0 = 1 denotes that
+        the first observation is o_1 = O[1].
+
+    Tm: transition matrix of size K x K such that Tm[i][j] stores the
+        probability that if at an instant t, the chain is at state s_i, 
+        then at instant t+1, the chain is at state s_j.
+
+    Em: emission matrix of size K x N such that Em[i][k] stores the 
+        probability that if the chain is at state s_i, the observable
+        outcome will be o_k.
+        NOTE: first index = state, second index = emission
+
+Output:
+    x: list of T indices [x_0,x_1,...x_T-1] of most likely states that
+        generate the observations in y, access the states themselves 
+        from the state space S, e.g. first state is s_(x_0) = S[x[0]]
+
+Implementation values:
+    dp1: K x T table, dp1[i][j] stores the largest possible probability
+            for which there exists a sequence [x_0,...,x_j-1] ending with 
+            x_j-1 = s_i that generates the observations y = [y_0,y_1,...,y_j-1]
+
+    dp2: K x T table, dp2[i][j] stores the index k ranging from 0 to K-1
+            such that dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] is maximised, this
+            is equivalently the index of the candidate that was chosen for
+            dp1[i][j], and is used for backtracking to find the path x of most
+            likely states.
+
+    i: index to iterate over K states
+    j: index to iterate over T observations
+    k: index to iterate over K states when finding maximum probability for
+        subproblem dp1[i][j]
+
+    opt: keeps track of index of the optimal path when backtracking to
+        compute x
+
+Recurrence relation:
+
+    Base case (dp1[i][0], j = 0): 
+    = largest possible prob that there exists a sequence [s_i] that generates 
+        the observations [y_0]
+    = initial probability that the chain starts in s_i AND the outcome y_0
+        is observed from s_i
+    = P[i] * Em[i][y[0]]
+
+    Recurrence case (dp1[i][j]):
+    = largest possible prob that there exists a sequence of length j ending in s_i 
+        that generates the first j observations
+    A sequence of length j ending in s_i can be formed by taking ANY sequence of 
+    length j-1 and adding s_i to it, given that previous sequence caused the 
+    observations equal to first j-1 observations in y.
+    This chain of length j-1 can end in any one of the K states.
+    To get the best probability, would have to choose from the best probability 
+    for the first j-1 states first, so the candidates for dp1[i][j] are:
+        best probability for sequence of length j-1 ending in state s_k AND
+        the sequence transitions to state s_i at the jth state AND
+        the observation y_j-1 is observed (emitted) from state s_i
+        = [dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] for k in range(K)]
+    choose the best one.
+"""
+
 def viterbi(O, S, P, y, Tm, Em):
-    """
-    Implementation of the Viterbi algorithm.
-
-    Input:
-        O: observation space of N observations [o_0,o_1,...,o_N-1].
-
-        S: state space of K states [s_0,s_1,...,s_K-1].
-
-        P: initial probabilities [p_0,p_1,...,p_K-1] for each of the K states,
-           where p_i is the probability that the chain starts in state s_i.
-
-        y: list of T initial observations [y_0,y_1,...,y_T-1], each entry
-           is the index of the observation in O, e.g. y_0 = 1 denotes that
-           the first observation is o_1 = O[1].
-
-        Tm: transition matrix of size K x K such that Tm[i][j] stores the
-            probability that if at an instant t, the chain is at state s_i, 
-            then at instant t+1, the chain is at state s_j.
-
-        Em: emission matrix of size K x N such that Em[i][k] stores the 
-            probability that if the chain is at state s_i, the observable
-            outcome will be o_k.
-            NOTE: first index = state, second index = emission
-
-    Output:
-        x: list of T indices [x_0,x_1,...x_T-1] of most likely states that
-           generate the observations in y, access the states themselves 
-           from the state space S, e.g. first state is s_(x_0) = S[x[0]]
-
-    Implementation values:
-        dp1: K x T table, dp1[i][j] stores the largest possible probability
-             for which there exists a sequence [x_0,...,x_j-1] ending with 
-             x_j-1 = s_i that generates the observations y = [y_0,y_1,...,y_j-1]
-
-        dp2: K x T table, dp2[i][j] stores the index k ranging from 0 to K-1
-             such that dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] is maximised, this
-             is equivalently the index of the candidate that was chosen for
-             dp1[i][j], and is used for backtracking to find the path x of most
-             likely states.
-
-        i: index to iterate over K states
-        j: index to iterate over T observations
-        k: index to iterate over K states when finding maximum probability for
-           subproblem dp1[i][j]
-
-        opt: keeps track of index of the optimal path when backtracking to
-           compute x
-
-    Recurrence relation:
-
-        Base case (dp1[i][0], j = 0): 
-        = largest possible prob that there exists a sequence [s_i] that generates 
-          the observations [y_0]
-        = initial probability that the chain starts in s_i AND the outcome y_0
-          is observed from s_i
-        = P[i] * Em[i][y[0]]
-
-        Recurrence case (dp1[i][j]):
-        = largest possible prob that there exists a sequence of length j ending in s_i 
-          that generates the first j observations
-        A sequence of length j ending in s_i can be formed by taking ANY sequence of 
-        length j-1 and adding s_i to it, given that previous sequence caused the 
-        observations equal to first j-1 observations in y.
-        This chain of length j-1 can end in any one of the K states.
-        To get the best probability, would have to choose from the best probability 
-        for the first j-1 states first, so the candidates for dp1[i][j] are:
-            best probability for sequence of length j-1 ending in state s_k AND
-            the sequence transitions to state s_i at the jth state AND
-            the observation y_j-1 is observed (emitted) from state s_i
-            = [dp1[k][j-1] * Tm[k][i] * Em[i][y[j]] for k in range(K)]
-        choose the best one.
-    """
     K, T = len(S), len(y)
     check_input(O, S, P, y, Tm, Em)
 
