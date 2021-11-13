@@ -50,7 +50,7 @@ def is_converged(q1, q2, eps):
     return np.linalg.norm(q1-q2) < eps
 
 def PageRank(W, max_iter=100, damping_factor=0.85, eps=0.001):
-    """
+    """ 
     
     """
     # Get the Google matrix for W
