@@ -1,9 +1,15 @@
+"""
+Implementation of Discrete Fourier Transform (DFT) algorithm for finding
+convolutions.
+
+Does not use numpy.
+"""
 import cmath
 from sequences import padzero, dot, convolution
 
 def p_a(a, k):
     """
-    Evaluate the polynomial sum_{l=0 to n-1} (a_l * w_n^lk), where
+    Evaluate the polynomial sum_{l=0}^{n-1} (a_l * w_n^lk), where
     w_n is the primitive nth root of unity
     j is reserved for representing i
     """
@@ -17,27 +23,24 @@ def dft(a):
     """
     DFT of sequence a = <a_0,a_1,...,a_n-1>
     """
-    A = []
     n = len(a)
-    for k in range(n):
-        A.append(p_a(a, k)) 
-    return A
+    return [p_a(a, k) for k in range(n)]
 
 def idft(A):
     """
     IDFT of sequence A = <A_0,A_1,...,A_n-1>
     """
-    a = []
     n = len(A)
-    for k in range(n):
-        a.append(p_a(A, -1*k)/n) 
-    return a
+    return [p_a(A, -k) / n for k in range(n)]
 
-def dftConvolution(a, b):
+def dft_convolution(a, b):
+    """
+    Compute the convolution of a and b using DFT
+    """
     l = len(a) + len(b) -1
-    padzero(a, l)
-    padzero(b, l)
-    return idft(dot(dft(a), dft(b)))
+    a_pad = padzero(a, l)
+    b_pad = padzero(b, l)
+    return idft(dot(dft(a_pad), dft(b_pad)))
 
 
 if __name__ == "__main__":
@@ -46,12 +49,10 @@ if __name__ == "__main__":
     actual = convolution(a, b)
     print()
 
-    conv = dftConvolution(a, b)
+    conv = dft_convolution(a, b)
     ans = []
     for x in conv:
-        print(complex(round(x.real,2), round(x.imag,2)))
         ans.append(round(x.real,2))
-    print()
 
     print(ans)
     print(actual)

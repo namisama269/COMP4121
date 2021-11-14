@@ -1,13 +1,10 @@
 """
-Implementation of the Fast Fourier Transform (FFT), which uses divide and conquer
-to solve DFT/IDFT in O(n log n) time.
-
-Does not use numpy.
+Implementation of normalized FFT algorithm.
 """
 import math, cmath
 from sequences import padzero, dot
 
-def fft(A):
+def fft_(A):
     n = len(A)
     if n == 1:
         return A
@@ -16,8 +13,8 @@ def fft(A):
     A1 = [A[i] for i in range(1, len(A), 2)] # odd indices
 
     # compute FFT* of subproblems of size n/2
-    y0 = fft(A0)
-    y1 = fft(A1)
+    y0 = fft_(A0)
+    y1 = fft_(A1)
 
     # nth root of unity
     w_n = cmath.exp(-2j * cmath.pi / n)
@@ -55,9 +52,14 @@ def ifft_(A):
     
     return y
 
+def fft(A):
+    # divide the FFT*(A) by length(A)
+    n = cmath.sqrt(len(A))
+    return [x/n for x in fft_(A)]
+
 def ifft(A):
     # divide the IFFT*(A) by length(A)
-    n = len(A)
+    n = cmath.sqrt(len(A))
     return [x/n for x in ifft_(A)]
 
 def fft_convolution(a, b):
@@ -70,4 +72,14 @@ def fft_convolution(a, b):
     b_pad = padzero(b, pad)
 
     # only take up to the actual length of the convolution
-    return ifft(dot(fft(a_pad), fft(b_pad)))[:l]
+    unscaled = ifft(dot(fft(a_pad), fft(b_pad)))
+
+    # because using the normalized FFT, the pointwise multiplication
+    # will cause product to be scaled by 1/sqrt(n) * 1/sqrt(n) = 1/n,
+    # and the IFFT will multiply by another 1/sqrt(n), so convolution 
+    # is scaled by 1/sqrt(n).
+    # To fix this, multiply the result by sqrt(n).
+    scaled = [x * cmath.sqrt(len(unscaled)) for x in unscaled]
+
+    # only take up to the actual length of the convolution
+    return scaled[:l]

@@ -30,5 +30,7 @@ def convolution(A, B):
     return conv
 
 def padzero(A, newLen):
-    while len(A) < newLen:
-        A.append(0)
+    C = A.copy()
+    while len(C) < newLen:
+        C.append(0)
+    return C
