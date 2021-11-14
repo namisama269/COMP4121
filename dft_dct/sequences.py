@@ -29,8 +29,8 @@ def convolution(A, B):
             conv[i+k] += A[i]*B[k]
     return conv
 
-def padzero(A, newLen):
+def padzero(A, new_len):
     C = A.copy()
-    while len(C) < newLen:
+    while len(C) < new_len:
         C.append(0)
     return C
