@@ -42,17 +42,3 @@ def dft_convolution(a, b):
     b_pad = padzero(b, l)
     return idft(dot(dft(a_pad), dft(b_pad)))
 
-
-if __name__ == "__main__":
-    a = [int(x) for x in input("Enter sequence a: ").split()]
-    b = [int(x) for x in input("Enter sequence b: ").split()]
-    actual = convolution(a, b)
-    print()
-
-    conv = dft_convolution(a, b)
-    ans = []
-    for x in conv:
-        ans.append(round(x.real,2))
-
-    print(ans)
-    print(actual)
