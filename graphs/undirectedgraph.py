@@ -52,7 +52,8 @@ class UndirectedGraph:
         edges = []
         for i in range(self.nV):
             for j in range(i+1, self.nV):
-                edges.append((i, j, self.edges[i][j]))
+                if self.edges[i][j] is not None:
+                    edges.append((i, j, self.edges[i][j]))
         return edges
 
     def printGraph(self):

@@ -25,23 +25,29 @@ def contract(G, u, v):
     G_uv = UndirectedGraph(nV-1)
     uv = nV-2
     edges = G.getEdges()
-
+    
     # Insert edges that do not involve vertices to be fused
     for edge in edges:
         v1, v2, w = edge
         if u != v1 and u != v2 and v != v1 and v != v2:
-            G_uv.insertEdge(vertexContractedIdx(v1), vertexContractedIdx(v2), w)
+            G_uv.insertEdge(vertex_contracted_idx(v1, nV, u, v), vertex_contracted_idx(v2, nV, u, v), w)
 
     # Check all other vertices for an edge incident to both u and v and insert it
     for x in range(nV):
         if x == u or x == v:
             continue
+        # Fuse edges from vertices that are incident to u and v
         if G.edgeExists(u, x) and G.edgeExists(v, x):
-            G_uv.insertEdge(uv, vertexContractedIdx(x, nV, u, v), G.getEdgeWeight(u, x) + G.getEdgeWeight(v, x))
+            G_uv.insertEdge(uv, vertex_contracted_idx(x, nV, u, v), G.getEdgeWeight(u, x) + G.getEdgeWeight(v, x))
+        # For edges that are incident to one of u and v but not both, change the endpoint to [uv]
+        elif G.edgeExists(u, x):
+            G_uv.insertEdge(uv, vertex_contracted_idx(x, nV, u, v), G.getEdgeWeight(u, x))
+        elif G.edgeExists(v, x):
+            G_uv.insertEdge(uv, vertex_contracted_idx(x, nV, u, v), G.getEdgeWeight(v, x))
     
     return G_uv
 
-def vertexContractedIdx(x, nV, u, v):
+def vertex_contracted_idx(x, nV, u, v):
     """
     Return the new vertex index of vertex x in graph with nV vertices in the graph found by
     contracting vertices u and v.
@@ -56,14 +62,19 @@ def vertexContractedIdx(x, nV, u, v):
         diff += 1
     return x - diff
 
-def randomEdge(G):
+def random_edge(G):
     edges = G.getEdges()
     edge = random.choice(edges)
     return edge[0], edge[1]
 
 def _4contract(G):
     """
-    
+    4-contract algorithm that contracts a graph to size n/2 4 times, and gets the min
+    cut from all 4 subproblems. 
+
+    Runs in O(n^2 log n) and has probability of returning correct min cut > 1/log n. 
+    This can be greatly increased for large n by repeating this algorithm and getting
+    the minimum result.
     """
     min1 = min2 = min3 = min4 = INT_MAX
     G0 = G.copy()
@@ -77,16 +88,16 @@ def _4contract(G):
         G4 = G0.copy()
 
         while G1.getNumVertices() > max(2, V0//2):
-            v1, v2 = randomEdge(G1)
+            v1, v2 = random_edge(G1)
             G1 = contract(G1, v1, v2)
         while G2.getNumVertices() > max(2, V0//2):
-            v1, v2 = randomEdge(G2)
+            v1, v2 = random_edge(G2)
             G2 = contract(G2, v1, v2)
         while G3.getNumVertices() > max(2, V0//2):
-            v1, v2 = randomEdge(G3)
+            v1, v2 = random_edge(G3)
             G3 = contract(G3, v1, v2)
         while G4.getNumVertices() > max(2, V0//2):
-            v1, v2 = randomEdge(G4)
+            v1, v2 = random_edge(G4)
             G4 = contract(G4, v1, v2)
 
         min1 = _4contract(G1)
@@ -103,15 +114,7 @@ def karger(G):
     """
     nV = G.getNumVertices()
     mincut = INT_MAX
-    numRuns = math.floor(math.log(nV) * math.log(nV))
-    for _ in range(numRuns):
+    num_runs = math.floor(math.log(nV) ** 2)
+    for _ in range(num_runs):
         mincut = min(mincut, _4contract(G))
     return mincut
-
-if __name__ == "__main__":
-    G = UndirectedGraph(3)
-    G.insertEdge(0,1,10)
-    G.insertEdge(0,2,20)
-    G.insertEdge(1,2,30)
-    for i in range(50):
-        print(karger(G))
