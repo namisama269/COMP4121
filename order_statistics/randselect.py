@@ -1,6 +1,6 @@
 import random
 
-def findith(A, i, p=0, r=-1):
+def find_ith(A, i, p=0, r=-1):
     """
     Find ith smallest element of A[p..r] using randselect
     """
@@ -84,7 +84,7 @@ def partition(A, p, r, q):
     swap(A, p, j)
     return j-p+1
 
-def findith_det(A, i, p=0, r=-1):
+def find_ith_det(A, i, p=0, r=-1):
     """
     Find ith element of A[p..r] using deterministic algselect. This algorithm runs asymptotically 
     in linear time but in practice runs much slower than using randselect.
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     i = int(input("Enter index: "))
     print(sorted(A))
-    print(findith_det(A, i))
+    print(find_ith_det(A, i))
 
 
 #[18, 53, 58, 63, 15, 80, 75, 18, 73, 83] 

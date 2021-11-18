@@ -1,5 +1,5 @@
 """
-
+Implementation of slip list with added functionality to search for kth element
 """
 import random
 

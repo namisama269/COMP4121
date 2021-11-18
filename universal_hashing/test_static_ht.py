@@ -14,10 +14,12 @@ infl = inflect.engine()
 keys = list(random.sample(range(U+1), n))
 values = [infl.number_to_words(key) for key in keys]
 
-print(keys)
+ht = StaticHashTable(U, keys, values)
+print(ht)
 print()
 
-ht = StaticHashTable(U, keys, values)
+print(keys)
+print()
 
 while True:
     try:

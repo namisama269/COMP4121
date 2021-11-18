@@ -99,4 +99,14 @@ class StaticHashTable:
         
         return stored_value
 
+    def __repr__(self):
+        rep = ""
+        for i in range(self.m):
+            rep += f"{i}: "
+            keys = [x[0] if x is not None else None for x in self.table[i]]
+            rep += str(keys)
+            if i != self.m-1:
+                rep += "\n"
+        return rep
+
     
