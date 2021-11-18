@@ -17,9 +17,12 @@ values = [infl.number_to_words(key) for key in keys]
 ht = StaticHashTable(U, keys, values)
 print(ht)
 print()
-
-print(keys)
+print(ht.space())
 print()
+
+if n < 200:
+    print(keys)
+    print()
 
 while True:
     try:

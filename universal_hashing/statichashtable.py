@@ -109,4 +109,9 @@ class StaticHashTable:
                 rep += "\n"
         return rep
 
+    def space(self):
+        total = self.m
+        for i in range(self.m-1):
+            total += len(self.table[i])
+        return total
     
