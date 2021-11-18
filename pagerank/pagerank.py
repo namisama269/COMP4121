@@ -2,7 +2,7 @@
 Implementation of PageRank algorithm
 """
 import sys; sys.path.append("..")
-from graphs.directedgraph import DirectedGraph
+#from graphs.directedgraph import DirectedGraph
 
 import numpy as np
 

@@ -86,5 +86,3 @@ if __name__ == "__main__":
             processCommands(sl, command, params)
         except EOFError:
             break
-
-# 3 9 17 21 25 26 27 29 34 

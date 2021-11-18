@@ -1,100 +1,102 @@
 """
-it doesnt work lol
+
 """
-
 import math
-from universalhash import isPrime, randVec, universalHash
+import random
+from universalhash import is_prime, rand_vec, universal_hash
 
-search  =5
+class UniversalHashFunction:
+    def __init__(self, m, U):
+        self.m = m
+        self.U = U
+        r = math.floor(math.log(U, m))
+        self.a = rand_vec(r, m)
+
+    def hash_(self, x):
+        if x > self.U:
+            raise ValueError("x cannot be greater than U")
+        return universal_hash(x, self.m, self.U, self.a)
+
+
+def find_table_size(n):
+    """
+    Find a prime number m such that n <= m <= 2n to be the size of the hash table
+    """
+    if n == 0 or n == 1:
+        return 2
+    for m in range(n, 2*n):
+        if is_prime(m):
+            return m
+    return None
+
 
 class StaticHashTable:
-    def __init__(self, hi):
-        self.hi = hi
-        self.size = self.findTableSize(hi) 
-        self.primaryTable = [[] for _ in range(self.size)]
-        self.primaryHash = self.randHashFunc()
-        self.secondaryHash = [self.randHashFunc() for _ in range(self.size)]
-        self.hashTable = [None for _ in range(self.size)]
-        self.hash1()
-        self.hash2()
+    def __init__(self, U, keys, values):
+        if max(keys) > U:
+            raise ValueError("All keys must be less than or equal to U")
+
+        # In a proper hash table these should NOT be stored, but we store them
+        # anyway so that they do not need to be passed into function parameters.
+        self.keys = keys
+        self.values = values
+
+        self.U = U
+        self.n = len(keys)
+        self.m = find_table_size(self.n)
+
+        self.table = [[] for _ in range(self.m)]
+
+        self.primary_hash_function = None
+        self.secondary_hash_functions = [None for _ in range(self.m)]
+
+        self._primary_hash()
+        self._secondary_hash()
+        
+    def _primary_hash(self):
+        self.primary_hash_function = UniversalHashFunction(self.m, self.U)
+        for key in self.keys:
+            hashed = self.primary_hash_function.hash_(key)
+            self.table[hashed].append(key)
+        
+        while (sum([len(self.table[i])**2 for i in range(self.m)]) >= 4 * self.n):
+            self._primary_hash()
+
+    def _secondary_hash(self):
+        for i in range(self.m):
+            inner_keys = self.table[i].copy()
+            self._secondary_hash_i(i, inner_keys)
     
-    @staticmethod
-    def findTableSize(n):
-        """
-        Find a prime number m such that n ≤ m ≤ 2n to be the size of the hash table
-        """
-        if n == 0 or n == 1:
-            return 2
-        for m in range(n, 2*n):
-            if isPrime(m):
-                return m
-        return None # should always be able to find an m
+    def _secondary_hash_i(self, i, inner_keys):
+        ni = len(inner_keys)
+        mi = find_table_size(ni**2)
+        self.table[i] = [None for _ in range(mi)]
 
-    def randHashFunc(self):
-        return randVec(math.floor(math.log(self.hi, self.size)), self.size)
-
-    def hash1(self):
-        """
+        self.secondary_hash_functions[i] = UniversalHashFunction(mi, self.U)
         
-        """
-        # check if sum(n_i^2) < 4n for i from 1 to M
-        ni = 5*self.hi
-        itt = 1
-        while ni >= 4*self.hi:
-            if itt > 1:
-                self.primaryHash = self.randHashFunc()
-            ni = 0
-            self.fillPrimaryTable()
-            for i in range(self.size):
-                ni += len(self.primaryTable[i]) ** 2
-            itt += 1
-
-    def fillPrimaryTable(self):
-        for i in range(self.size):
-            self.primaryTable[i].clear()
-        m = self.size
-        r = math.floor(math.log(self.hi, m))
-        for i in range(1, self.hi+1):
-            self.primaryTable[universalHash(i, m, self.hi, self.primaryHash)].append(i)
-
-    def hash2(self):
-        for ix in range(self.size):
-            self.fillSecondaryTable(ix)
-
-    def fillSecondaryTable(self, ix):
-        tix = self.primaryTable[ix]
-        m = self.findTableSize(len(tix))
-        if m is None:
-            self.hashTable[ix] = None
-            return
-        self.hashTable[ix] = [None] * m
-        for i in range(len(tix)):
-            # j_x = h_ix(x)
-            jx = universalHash(tix[i], m, self.hi, self.secondaryHash[ix])
-            if tix[i] == search:
-                print(f"{jx} = hash(({tix[i]}, {m}), {self.hi}, {self.secondaryHash[ix]})")
-                print()
-            if self.hashTable[ix][jx] is None:
-                self.hashTable[ix][jx] = tix[i]
+        for key in inner_keys:
+            hashed = self.secondary_hash_functions[i].hash_(key)
+            if self.table[i][hashed] is not None:
+                self.table[i] = [None for _ in range(mi)]
+                self._secondary_hash_i(i, inner_keys)
             else:
-                self.secondaryHash[ix] = self.randHashFunc()
-                self.fillSecondaryTable(ix)
-
-
-
-if __name__ == "__main__":
-    h = StaticHashTable(10)
-    print(h.primaryTable)
-    print(h.hashTable)
-    print(h.size)
-    n = universalHash(search, h.size, h.hi, h.primaryHash)
-    print(n)
-    n = universalHash(search, h.size, h.hi, h.primaryHash)
-    print(n)
-    n2 = universalHash(search, 2, h.hi, h.secondaryHash[n])
-    print(n2)
-    n2 = universalHash(search, 2, h.hi, h.secondaryHash[n])
-    print(f"{n2} = hash(({search}, {2}), {h.hi}, {h.secondaryHash[n]})")
-    print(n2)
-
+                # store the key, value pair instead of just the value to 
+                # check for nonexistent keys when searching
+                self.table[i][hashed] = (key, self.values[self.keys.index(key)])
+    
+    def search(self, key):
+        if key > self.U:
+            return None
         
+        primary_idx = self.primary_hash_function.hash_(key)
+        secondary_idx = self.secondary_hash_functions[primary_idx].hash_(key)
+
+        if self.table[primary_idx][secondary_idx] is None:
+            return None
+        else:
+            stored_key, stored_value = self.table[primary_idx][secondary_idx]
+        if stored_key != key:
+            return None
+        
+        return stored_value
+
+    
