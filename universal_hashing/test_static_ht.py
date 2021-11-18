@@ -9,8 +9,7 @@ inclusive, and the key as the number in words.
 inflect library is used to convert number to words: pip3 install inflect
 """
 
-n = 15
-U = 1000
+n, U = [int(x) for x in input("Enter n = number of keys and U = max key: ").split()]
 infl = inflect.engine()
 keys = list(random.sample(range(U+1), n))
 values = [infl.number_to_words(key) for key in keys]
